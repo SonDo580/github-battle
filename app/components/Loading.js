@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 
 const styles = {
@@ -10,69 +10,50 @@ const styles = {
   textAlign: "center",
 };
 
-class Delayed extends Component {
-  state = {
-    show: false,
-  };
+function Delayed({ children, wait = 300 }) {
+  const [show, setShow] = useState(false);
 
-  componentDidMount() {
-    this.timeout = window.setTimeout(() => {
-      this.setState({ show: true });
-    }, this.props.wait);
-  }
+  const timerRef = useRef(null);
 
-  componentWillUnmount() {
-    window.clearTimeout(this.timeout);
-  }
+  useEffect(() => {
+    timerRef.current = setTimeout(() => {
+      setShow(true);
+    }, wait);
 
-  render() {
-    return this.state.show ? this.props.children : null;
-  }
+    return () => clearTimeout(timerRef.current);
+  }, []);
+
+  return show ? children : null;
 }
 
-Delayed.defaultProps = {
-  wait: 300,
-};
-
 Delayed.propTypes = {
-  wait: PropTypes.number.isRequired,
+  wait: PropTypes.number,
   children: PropTypes.node,
 };
 
-export default class Loading extends Component {
-  state = {
-    content: this.props.text,
-  };
+export default function Loading({ text = "Loading", speed = 300 }) {
+  const [content, setContent] = useState(text);
 
-  componentDidMount() {
-    const { text, speed } = this.props;
+  const intervalRef = useRef(null);
 
-    this.interval = window.setInterval(() => {
-      this.state.content === text + "..."
-        ? this.setState({ content: text })
-        : this.setState(({ content }) => ({ content: content + "." }));
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      content === text + "..."
+        ? setContent(text)
+        : setContent((content) => content + ".");
     }, speed);
-  }
 
-  componentWillUnmount() {
-    window.clearInterval(this.interval);
-  }
+    return () => clearInterval(intervalRef.current);
+  }, []);
 
-  render() {
-    return (
-      <Delayed>
-        <p style={styles}>{this.state.content}</p>
-      </Delayed>
-    );
-  }
+  return (
+    <Delayed>
+      <p style={styles}>{content}</p>
+    </Delayed>
+  );
 }
 
 Loading.propTypes = {
   text: PropTypes.string,
   speed: PropTypes.number,
-};
-
-Loading.defaultProps = {
-  text: "Loading",
-  speed: 300,
 };

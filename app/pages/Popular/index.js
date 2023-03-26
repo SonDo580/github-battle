@@ -1,30 +1,10 @@
 import React, { useEffect, useReducer } from "react";
-import PropTypes from "prop-types";
-import { fetchPopularRepos } from "../utils/api";
-import Table from "./Table";
-import Loading from "./Loading";
 
-const languages = ["All", "Javascript", "Ruby", "Java", "CSS", "Python"];
+import { fetchPopularRepos } from "../../utils/api";
 
-function LanguagesNav({ updateLanguage, selectedLanguage }) {
-  return (
-    <select
-      value={selectedLanguage}
-      onChange={(event) => updateLanguage(event.target.value)}
-    >
-      {languages.map((language) => (
-        <option key={language} value={language}>
-          {language}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-LanguagesNav.propTypes = {
-  selectedLanguage: PropTypes.string.isRequired,
-  updateLanguage: PropTypes.func.isRequired,
-};
+import Loading from "../../components/Loading";
+import LanguagesNav from "./components/LanguagesNav";
+import Table from "./components/Table";
 
 const initialState = {
   selectedLanguage: "All",

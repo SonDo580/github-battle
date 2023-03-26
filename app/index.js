@@ -8,7 +8,7 @@ import Nav from "./components/Nav";
 import "./index.css";
 
 const Battle = React.lazy(() => import("./pages/Battle"));
-const Popular = React.lazy(() => import("./components/Popular"));
+const Popular = React.lazy(() => import("./pages/Popular"));
 const Result = React.lazy(() => import("./components/Result"));
 
 function App() {

@@ -1,7 +1,6 @@
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import withHover from "./withHover";
-import Hover from "./Hover";
+import useHover from "../hooks/useHover";
 
 const container = {
   position: "relative",
@@ -9,15 +8,13 @@ const container = {
 };
 
 export default function Tooltip({ children, element }) {
+  const { hovering, mouseOver, mouseOut } = useHover();
+
   return (
-    <Hover>
-      {(hovering) => (
-        <div style={container}>
-          {hovering && element}
-          {children}
-        </div>
-      )}
-    </Hover>
+    <div style={container} onMouseOver={mouseOver} onMouseOut={mouseOut}>
+      {hovering && element}
+      {children}
+    </div>
   );
 }
 

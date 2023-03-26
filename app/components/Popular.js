@@ -1,13 +1,12 @@
-import React, { Component } from "react";
+import React, { useEffect, useReducer } from "react";
 import PropTypes from "prop-types";
 import { fetchPopularRepos } from "../utils/api";
 import Table from "./Table";
+import Loading from "./Loading";
 
-function LanguagesNav(props) {
-  const { updateLanguage, selectedLanguage } = props;
+const languages = ["All", "Javascript", "Ruby", "Java", "CSS", "Python"];
 
-  const languages = ["All", "Javascript", "Ruby", "Java", "CSS", "Python"];
-
+function LanguagesNav({ updateLanguage, selectedLanguage }) {
   return (
     <select
       value={selectedLanguage}
@@ -27,56 +26,75 @@ LanguagesNav.propTypes = {
   updateLanguage: PropTypes.func.isRequired,
 };
 
-export default class Popular extends Component {
-  state = {
-    selectedLanguage: "All",
-    repos: null,
-    error: null,
-  };
+const initialState = {
+  selectedLanguage: "All",
+  loading: true,
+  repos: null,
+  error: null,
+};
 
-  componentDidMount() {
-    this.updateLanguage(this.state.selectedLanguage);
+function popularReducer(state, action) {
+  switch (action.type) {
+    case "FETCH_INIT":
+      return { ...state, loading: true, selectedLanguage: action.payload };
+    case "FETCH_SUCCESS":
+      return { ...state, loading: false, error: null, repos: action.payload };
+    case "FETCH_ERROR":
+      return { ...state, loading: false, error: "Error fetching repos" };
+    default:
+      return state;
   }
+}
 
-  updateLanguage = (selectedLanguage) => {
-    this.setState({
-      selectedLanguage,
-      error: null,
+export default function Popular() {
+  const [state, dispatch] = useReducer(popularReducer, initialState);
+  const { selectedLanguage, loading, repos, error } = state;
+
+  useEffect(() => {
+    updateLanguage(selectedLanguage);
+  }, []);
+
+  const updateLanguage = (selectedLanguage) => {
+    dispatch({
+      type: "FETCH_INIT",
+      payload: selectedLanguage,
     });
 
     fetchPopularRepos(selectedLanguage)
       .then((repos) =>
-        this.setState({
-          repos,
-          error: null,
+        dispatch({
+          type: "FETCH_SUCCESS",
+          payload: repos,
         })
       )
       .catch((error) => {
         console.warn("Error fetching repos: ", error);
 
-        this.setState({
-          error: "Error fetching repos",
+        dispatch({
+          type: "FETCH_ERROR",
         });
       });
   };
 
-  render() {
-    const { selectedLanguage, repos, error } = this.state;
-
-    return (
-      <main className="stack main-stack animate-in">
-        <div className="split">
-          <h1>Polular</h1>
-          <LanguagesNav
-            selectedLanguage={selectedLanguage}
-            updateLanguage={this.updateLanguage}
-          />
-        </div>
-
-        {error && <p className="text-center error">{error}</p>}
-
-        {repos && <Table repos={repos} />}
-      </main>
-    );
+  if (loading) {
+    return <Loading text="Fetching repos" />;
   }
+
+  return (
+    <main className="stack main-stack animate-in">
+      <div className="split">
+        <h1>Polular</h1>
+        <LanguagesNav
+          selectedLanguage={selectedLanguage}
+          updateLanguage={updateLanguage}
+        />
+      </div>
+
+      {error ? (
+        <p className="text-center error">{error}</p>
+      ) : (
+        repos && <Table repos={repos} />
+      )}
+    </main>
+  );
 }

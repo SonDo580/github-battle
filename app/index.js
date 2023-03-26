@@ -9,7 +9,7 @@ import "./index.css";
 
 const Battle = React.lazy(() => import("./pages/Battle"));
 const Popular = React.lazy(() => import("./pages/Popular"));
-const Result = React.lazy(() => import("./components/Result"));
+const Result = React.lazy(() => import("./pages/Result"));
 
 function App() {
   const [theme, setTheme] = useState("light");
